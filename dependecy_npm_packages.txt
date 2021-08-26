@@ -1,0 +1,22 @@
+npm install --save bootstrap
+npm install --save axios
+npm install --save react @trendmicro/react-sidenav
+npm install --save react @fortawesome/fontawesome-free
+npm install --save react-bootstrap bootstrap@3
+npm add codemirror
+npm install --save react-apexcharts apexcharts
+npm install --save react-bootstrap-validation
+npm install --save install react-bootstrap-table
+npm install --save react-codemirror2
+npm install --save react-file-download
+npm install --save react-hook-form
+npm install --save react-hooks-helper
+npm install --save react-json-csv
+npm install --save react-loader-spinner
+npm install --save react-promise-tracker
+npm install --save react-router-dom
+npm install --save react-tooltip
+
+
+
+
