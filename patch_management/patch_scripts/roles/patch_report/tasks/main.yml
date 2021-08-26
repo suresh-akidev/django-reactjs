@@ -1,0 +1,19 @@
+---
+- name: Include vars from config yaml file
+  include_vars:
+    file: "{{ configfilepath }}"
+    name: patchconfig
+    
+- name: run Patch report python code
+  command: python Patch_Report.py -config {{configfilepath}}
+  args:
+    chdir: "{{ role_path }}/files"
+  run_once: true
+  delegate_to: localhost
+  ignore_errors: true
+  register: patchreport_status
+
+- name: update dataprocessing status
+  shell: echo "{{ ansible_nodename | quote }}, {{ role_name | quote }} role,Failed " >> {{ data_output_path }}/Master-Execution-Summary.csv
+  when: patchreport_status.rc is defined and patchreport_status.rc != 0
+  delegate_to: localhost

@@ -1,0 +1,667 @@
+/* 
+=======================================================
+Theme Name: DXC SBI-Cards Automation
+Author: Selin Ananth S
+=======================================================  
+*/
+
+html {
+  overflow-y: scroll;
+}
+footer nav,
+header Nav,
+body {
+  padding-right: 0 !important;
+}
+body {
+  background-color: rgb(235, 235, 235);
+}
+
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+.bg-dark {
+  background-color: #000 !important;
+}
+
+ul.social-network {
+  list-style: none;
+  margin: 0;
+}
+
+ul.social-network li {
+  display: inline;
+  margin: 0 5px;
+}
+
+ul.social-network li a:hover {
+  -webkit-transition: all 1s ease-in-out;
+  -moz-transition: all 1s ease-in-out;
+  -o-transition: all 1s ease-in-out;
+  transition: all 1s ease-in-out;
+}
+
+.navbar-menu {
+  text-align: right !important;
+  display: table-cell !important;
+  vertical-align: middle !important;
+}
+
+.copyright {
+  text-align: center;
+  font-size: 13px;
+  color: #fff;
+}
+
+.navbar img {
+  width: 150px;
+}
+
+[class*="span"] {
+  float: left;
+  min-height: 1px;
+  margin-left: 20px;
+}
+
+h4 {
+  /* font-weight: bold; */
+  color: #fff;
+  margin-bottom: 0.75rem;
+  text-shadow: 0 1px 1px rgb(0 0 0 / 40%);
+}
+h5,
+h6 {
+  text-shadow: 0 1px 1px rgb(0 0 0 / 40%);
+}
+.form-wrapper {
+  background: #464646;
+  border-radius: 10px;
+  padding: 25px;
+  color: #fff;
+}
+
+.form-control.form-read-only {
+  background-color: #aeaeaf;
+}
+
+table.table-bordered thead .handsCursor,
+.handsCursor {
+  cursor: pointer;
+}
+
+.loading-overlay {
+  background: rgba(88, 88, 88, 0.37);
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: 2;
+  align-items: center;
+  justify-content: center;
+  display: flex;
+  -webkit-transition: color 0.3s cubic-bezier(0.7, 0, 0.3, 1);
+  transition: color 0.3s cubic-bezier(0.7, 0, 0.3, 1);
+}
+
+/*  Side Nav Bar*/
+
+.sideNavBar {
+  margin-top: 40px !important;
+}
+
+.sideNavBar .sidenav---sidenav---_2tBP {
+  background-color: #000 !important;
+  position: fixed !important;
+  top: 40px;
+}
+
+.sideNavBar .sidenav---sidenav---_2tBP i {
+  color: #fff !important;
+  font-size: 1.75em !important;
+  text-shadow: 0 1px 1px rgb(0 0 0 / 40%);
+}
+
+.sideNavBar .sidenav---sidenav---_2tBP .sideNavText {
+  color: #fff !important;
+  text-shadow: 0 1px 1px rgb(0 0 0 / 40%);
+}
+
+.sidenav---sidenav---_2tBP.sidenav---collapsed---LQDEv
+  .sidenav---sidenav-nav---3tvij
+  .sidenav---sidenav-navitem---uwIJ-:hover
+  > .sidenav---sidenav-subnav---1EN61 {
+  background-color: #000;
+  min-width: 125px !important;
+  border: 0ch;
+}
+
+.sidenav---sidenav-subnav---1EN61
+  > .sidenav---sidenav-subnavitem---1cD47
+  > .sidenav---navitem---9uL5T {
+  color: #fff;
+  text-shadow: 0 1px 1px rgb(0 0 0 / 40%);
+}
+
+.sidenav---sidenav-subnav---1EN61
+  > .sidenav---sidenav-subnavitem---1cD47
+  > .sidenav---navitem---9uL5T:hover,
+.sidenav---sidenav-subnav---1EN61
+  > .sidenav---sidenav-subnavitem---1cD47.sidenav---selected---1EK3y
+  > .sidenav---navitem---9uL5T:hover {
+  background-color: rgba(175, 174, 174, 0.445);
+}
+
+.sidenav---sidenav---_2tBP.sidenav---expanded---1KdUL
+  .sidenav---sidenav-subnav---1EN61
+  > .sidenav---sidenav-subnavitem---1cD47
+  > .sidenav---navitem---9uL5T {
+  color: #fff;
+  margin-left: 35px;
+  line-height: 30px;
+}
+
+.topTab {
+  position: relative;
+  top: 50px;
+}
+
+.disabled-a {
+  color: #c5c5c5;
+}
+
+a {
+  color: #2e2e2e;
+  text-decoration: none;
+  outline: none;
+}
+
+.tabs {
+  position: relative;
+  overflow: hidden;
+  margin: 0 auto;
+  width: 100%;
+  font-weight: 300;
+  font-size: 1.25em;
+}
+
+/* Nav */
+.tabs nav {
+  text-align: center;
+  margin-bottom: 10px;
+}
+
+.tabs nav ul {
+  position: relative;
+  display: flex;
+  margin: 0 auto;
+  padding: 0;
+  max-width: 1200px;
+  list-style: none;
+  flex-flow: row wrap;
+  justify-content: center;
+}
+
+.tabs nav ul li {
+  position: relative;
+  z-index: 1;
+  display: block;
+  margin: 0;
+  text-align: center;
+  flex: 1;
+}
+
+.tabs nav a {
+  position: relative;
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 2.5;
+}
+
+.tabs nav a span {
+  vertical-align: middle;
+  font-size: 0.75em;
+  text-shadow: 0 1px 1px rgb(0 0 0 / 20%);
+}
+
+.tabs nav a:focus {
+  outline: none;
+  text-shadow: 0 1px 1px rgb(0 0 0 / 20%);
+}
+
+.tabs-style-linetriangle nav a span {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 1em;
+}
+
+.tabs-style-linetriangle nav li.tab-current a:after,
+.tabs-style-linetriangle nav li.tab-current a:before {
+  position: absolute;
+  top: 100%;
+  left: 50%;
+  width: 0;
+  height: 0;
+  border: solid transparent;
+  content: "";
+  pointer-events: none;
+}
+
+.tabs-style-linetriangle nav li.tab-current a:before {
+  margin-left: -11px;
+  border-width: 11px;
+  border-top-color: rgba(0, 0, 0, 0.2);
+}
+
+/* Data Table*/
+.react-bs-table-bordered {
+  border: 1px solid #999999 !important;
+  border-radius: 10px !important;
+  background-color: #f8f9fad1 !important;
+}
+
+.ReactModal__Overlay--after-open {
+  top: 45px !important;
+}
+
+.modal-dialog.datatableModal {
+  max-width: 60% !important;
+}
+.modal-dialog.datatableModal.modalViewwidh90 {
+  max-width: 90% !important;
+}
+.modal-dialog.datatableModal.modalViewwidh80 {
+  max-width: 80% !important;
+}
+.modal-dialog.datatableModal.modalViewwidh70 {
+  max-width: 70% !important;
+}
+.modal-dialog.datatableModal.modalViewwidh60 {
+  max-width: 60% !important;
+}
+.modal-dialog.datatableModal.modalViewwidh50 {
+  max-width: 50% !important;
+}
+.modal-dialog.datatableModal.modalViewwidh40 {
+  max-width: 40% !important;
+}
+.modal-dialog.datatableModal.modalViewwidh30 {
+  max-width: 30% !important;
+}
+.modal-dialog.datatableModal.modalViewwidh90 .CodeMirror {
+  height: 380px;
+}
+
+.ReactModal__Content.modal-dialog {
+  border: 1px solid #999 !important;
+  box-shadow: 0 3px 9px rgba(0, 0, 0, 0.5) !important;
+  border-radius: 6px !important;
+}
+
+.react-bs-table-tool-bar .react-bs-table-search-form {
+  float: right !important;
+}
+.react-bs-table-tool-bar .react-bs-table-search-form input {
+  width: 200px !important;
+}
+
+div.wrapper {
+  margin: 0 auto;
+  border-top: 1px solid #888888;
+  box-shadow: 0 0 10px 10px rgba(0, 0, 0, 0.1);
+}
+
+.fas.fa-plus,
+.fas.fa-upload,
+.fas.fa-download {
+  font-size: 20px;
+}
+
+.modal.show .modal-dialog {
+  top: 80px;
+}
+
+/* Ripple magic */
+.btn-theme,
+.buttonIcone {
+  position: relative;
+  overflow: hidden;
+}
+.btn-theme:after,
+.buttonIcone:after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.5);
+  opacity: 0;
+  border-radius: 100%;
+  transform: scale(1, 1) translate(-50%);
+  transform-origin: 50% 50%;
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0, 0);
+    opacity: 1;
+  }
+  20% {
+    transform: scale(25, 25);
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(40, 40);
+  }
+}
+
+.btn-theme:focus:not(:active)::after,
+.buttonIcone:focus:not(:active)::after {
+  animation: ripple 1s ease-out;
+}
+
+.buttonIcone {
+  background: transparent;
+  border: 0;
+}
+
+.buttonIcone:hover,
+.buttonIcone:focus {
+  background: transparent;
+  border: 0;
+}
+.buttonIcone.success i {
+  color: #28a745 !important;
+}
+.buttonIcone.primary i {
+  color: #007bff !important;
+}
+.buttonIcone.danger i {
+  color: #dc3545 !important;
+}
+.buttonIcone.secondary i {
+  color: #6c757d !important;
+}
+.buttonIcone.warning i {
+  color: #ffc107 !important;
+}
+.buttonIcone.info i {
+  color: #17a2b8 !important;
+}
+
+.h4Server {
+  color: #000 !important;
+}
+.h4White {
+  color: #fff !important;
+  text-shadow: 0 1px 0 #555;
+}
+.h4Black {
+  color: #000 !important;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.5);
+}
+.table {
+  font-size: 14px;
+}
+
+.filediv.btn {
+  position: relative;
+  overflow: hidden;
+}
+.filediv .filebtn {
+  position: absolute;
+  cursor: pointer !important;
+  opacity: 0;
+  right: 0;
+  top: 0;
+}
+
+.pinterest {
+  border: 1px solid #ccc;
+  padding: 10px;
+  box-shadow: 0 8px 10px 1px rgb(0 0 0 / 14%), 0 3px 14px 2px rgb(0 0 0 / 12%),
+    0 5px 5px -3px rgb(0 0 0 / 20%);
+}
+
+.pinterest:hover {
+  -moz-transform: scale(1.25);
+  -webkit-transform: scale(1.25);
+  -o-transform: scale(1.25);
+  -ms-transform: scale(1.25);
+  -webkit-transform: scale(1.25);
+  transform: scale(1.25);
+
+  -webkit-transition: transform 1s ease-in-out;
+  -moz-transition: transform 1s ease-in-out;
+  -ms-transition: transform 1s ease-in-out;
+  transition: transform 1s ease-in-out;
+}
+
+.tool-tips-bg {
+  background: rgba(0, 0, 0, 0.25) !important;
+  opacity: 0.5 !important;
+}
+
+.line {
+  border-top: 1px solid #eee;
+  margin-top: 5px;
+}
+
+.MonthHeader {
+  color: #343a3b !important;
+}
+
+.form-wrapper.box-form-shadow {
+  box-shadow: 0 5px 25px 5px #495057 !important;
+}
+
+.card.box-popform-shadow {
+  box-shadow: 0 0 10px -5px #495057;
+}
+
+.nav-tabs .nav-link {
+  border-color: #e9ecef #e9ecef #dee2e6;
+}
+
+.accordion {
+  margin-bottom: 15px;
+}
+.card.box-popform-shadow .card-header {
+  background-color: transparent;
+  border-bottom: 0;
+  cursor: pointer;
+  color: #007bff;
+}
+
+@media (min-width: 1600px) {
+  .container,
+  .container-lg,
+  .container-md,
+  .container-sm,
+  .container-xl {
+    max-width: 1440px;
+  }
+}
+
+@media (min-width: 1920px) {
+  .container,
+  .container-lg,
+  .container-md,
+  .container-sm,
+  .container-xl {
+    max-width: 1750px;
+  }
+}
+
+@media (min-width: 2048px) {
+  .container,
+  .container-lg,
+  .container-md,
+  .container-sm,
+  .container-xl {
+    max-width: 1820px;
+  }
+}
+
+@media (min-width: 3840px) {
+  .container,
+  .container-lg,
+  .container-md,
+  .container-sm,
+  .container-xl {
+    max-width: 3540px;
+  }
+}
+
+.fixed-top-header {
+  position: fixed;
+  top: 0;
+  right: 0;
+  left: 0;
+  z-index: 1030;
+  height: 40px;
+}
+.fixed-bottom-footer {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 1030;
+  height: 25px;
+  padding: 0;
+}
+.content {
+  padding: 10px 40px 10px 70px;
+}
+.contentMain {
+  padding-left: 40px;
+}
+.content .card {
+  border-radius: 4px;
+  background-color: #fff;
+  margin-bottom: 30px;
+  box-shadow: 0 0px 10px 0px #00000066;
+  border: none;
+}
+
+.content .card-stats .card-body {
+  padding: 15px 15px 0;
+}
+
+.content .card .card-body {
+  padding: 15px 15px 10px;
+}
+.content .card-stats .card-body .numbers {
+  font-size: 1rem;
+  text-align: right;
+}
+
+.content .card-footer {
+  padding: 0.75rem 1.25rem;
+  border-top: 1px solid #00000066;
+}
+
+.text-shadow {
+  text-shadow: 0 1px 1px rgb(0 0 0 / 20%);
+}
+
+.card-stats.card .card-body .progress {
+  margin-bottom: 15px;
+}
+
+.border-left-primary {
+  border-left: 0.25rem solid #007bff !important;
+}
+
+.no-gutters {
+  margin-right: 0;
+  margin-left: 0;
+}
+
+.text-xs {
+  font-size: 0.7rem;
+}
+
+.popover.dashboardpop {
+  background: #fff;
+  max-width: 750px;
+  box-shadow: 0 20px 50px 10px #464646;
+  border-radius: 50px;
+  z-index: 50 !important;
+}
+
+.popover.dashboardpop .popover-header {
+  color: #464646;
+  font-weight: bold;
+  /* background-color: #464646; */
+  /* border-bottom: 1px solid #464646; */
+  background-color: transparent;
+  border-bottom: 0;
+  text-align: center;
+  text-shadow: 0 1px 1px rgb(0 0 0 / 20%);
+}
+
+.dropdown .nav-link {
+  text-shadow: 0 1px 1px rgb(0 0 0 / 20%);
+  background-color: transparent;
+}
+.dropdown .nav-link:hover,
+.dropdown .nav-link:focus {
+  text-shadow: 0 1px 1px rgb(0 0 0 / 30%);
+  background-color: transparent;
+  color: #000;
+}
+.dropdown .dropdown-menu {
+  text-shadow: 0 1px 1px rgb(0 0 0 / 20%);
+  background-color: #fffffff2;
+  border-radius: 10px;
+}
+.dropdown .dropdown-menu > a:hover,
+.dropdown .dropdown-menu > a:focus {
+  background-color: #0000009a;
+  color: #fff;
+}
+.dropdown .dropdown-item {
+  padding: 0.25rem 0.75rem;
+}
+
+.bg-pink {
+  background-color: #fd7e14;
+}
+
+.text-pink {
+  color: #fd7e14;
+}
+.table-hover tbody tr:hover td,
+.table-hover tbody tr:hover th {
+  background-color: #ffc10771;
+}
+
+.mymodal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  border: 1px solid #ccc;
+  background: #fff;
+  overflow: auto;
+  border-radius: 4px;
+  outline: none;
+  padding: 20px;
+}
+
+.myoverlay {
+  position: fixed;
+  top: 30px !important;
+  left: 64px;
+  right: 0px;
+  bottom: 10px;
+  background-color: rgba(0, 0, 0, 0.75);
+}

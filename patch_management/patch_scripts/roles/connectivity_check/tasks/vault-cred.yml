@@ -1,0 +1,51 @@
+---
+- name: Fetch HVAC credentials path in inventory file
+  set_fact:
+    hvac_username_path: "{{ item['username'] | regex_replace('^\\$HVAC:(.*)$', '\\1') | regex_replace('/username') }}"
+    hvac_password_path: "{{ item['password'] | regex_replace('^\\$HVAC:(.*)$', '\\1') | regex_replace('/password') }}"
+  with_items:
+    - "{{ serverdetailsvars.serverdetails }}"
+  when: ("$HVAC:" in item['username'] or "$HVAC:" in item['password'])
+  ignore_errors: true
+  delegate_to: localhost
+  no_log: true
+
+- name: Return all secrets from a path
+  set_fact:
+    hvac_username_value: "{{ lookup('hashi_vault', 'secret='+ hvac_username_path).username }}"
+    hvac_password_value: "{{ lookup('hashi_vault', 'secret='+ hvac_password_path).password }}"
+  with_items:
+    - "{{ serverdetailsvars.serverdetails }}"
+  when: ("$HVAC:" in item['username'] or "$HVAC:" in item['password'])
+  ignore_errors: true
+  delegate_to: localhost
+  no_log: true
+  register: hvacstatus
+
+- name: Update vault access status to Master Execution Summary
+  shell: echo "{{ item['servername'] }},Vault is not accessible,Failed" >> {{ data_output_path }}/Master-Execution-Summary.csv
+  with_items: "{{ serverdetailsvars.serverdetails }}"
+  when: hvacstatus.failed is defined and hvacstatus.failed == True
+  run_once: true
+  delegate_to: localhost
+  no_log: true  
+
+- name: Add ssh hosts dynamically with HVAC cred
+  add_host:
+    name: "{{ item['servername'] }}"
+    groups: sshhosts
+    ansible_user: "{{ hvac_username_value }}"
+    ansible_password: "{{ hvac_password_value }}"
+    monitor_enabled: "{{ item['monitor_enabled'] }}"
+    monitor_server: "{{ item['monitor_server'] }}"
+    backup_enabled: "{{ item['backup_enabled'] }}"
+    backup_server: "{{ item['backup_server'] }}"
+    actual_startdate: "{{ item['actual_startdate'] }}"
+    actual_enddate: "{{ item['actual_enddate'] }}"
+    ansible_connection: ssh
+  with_items:
+    - "{{ serverdetailsvars.serverdetails }}"
+  when: item['servername'] is not match("#.*") and patchconfig.Inventory.Connectivity_Method  == "ansible-ssh" and ("$HVAC:" in item['username'] or "$HVAC:" in item['password'])
+  ignore_errors: true
+  delegate_to: localhost
+  no_log: true

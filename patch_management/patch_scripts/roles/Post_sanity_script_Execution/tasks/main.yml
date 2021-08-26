@@ -1,0 +1,78 @@
+---
+- name: Include config vars to patchconfig
+  include_vars:
+    file: "{{ configfilepath }}"
+    name: patchconfig
+
+- name: Delete existing temp folders
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+   - "{{ patchconfig.Output.Path.Remote_Server_output_path }}/files"
+   - "{{ patchconfig.Output.Path.Remote_Server_output_path }}/patch-management"
+
+- name: Create remote working directory
+  file:
+    path: "{{ patchconfig.Output.Path.Remote_Server_output_path }}"
+    state: directory
+
+- name: Copy file to remote
+  copy:
+    src: files/
+    dest: "{{ patchconfig.Output.Path.Remote_Server_output_path }}/files/"
+
+- name: Give executable permissions
+  file:
+    path: "{{ patchconfig.Output.Path.Remote_Server_output_path }}/files"
+    mode: '0750'
+    recurse: yes
+
+- name: Run Health Check file
+  command: "sudo sh {{ patchconfig.Output.Path.Remote_Server_output_path }}/files/{{ item | basename }} {{ patchconfig.Output.Path.Remote_Server_output_path }}"
+  ignore_errors: true
+  register: run_output
+  with_fileglob:
+      - "files/*.sh"
+
+- name: Compress the output files
+  archive:
+    path:
+      - "{{ patchconfig.Output.Path.Remote_Server_output_path }}/patch-management/*.csv"
+      - "{{ patchconfig.Output.Path.Remote_Server_output_path }}/patch-management/*.log"
+      - "{{ patchconfig.Output.Path.Remote_Server_output_path }}/patch-management/*.txt"
+    dest: "{{ patchconfig.Output.Path.Remote_Server_output_path }}/patch-management.tar"
+    format: tar
+
+- name: Delete existing temp folders
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+   - "{{ patchconfig.Output.Path.Master_Server_Output_path}}/{{patchconfig.Patchoutput}}/{{ patchconfig.Technology }}/{{ patchconfig.PostPatchOutput }}/"
+  delegate_to: localhost
+
+- name: Create data output path
+  file:
+    path: "{{ data_output_post_patch_path }}"
+    state: directory
+  delegate_to: localhost
+
+- name: Fetch compressed file from the remote and save to local
+  fetch:
+    src: "{{ patchconfig.Output.Path.Remote_Server_output_path }}/patch-management.tar"
+    dest: "{{ data_output_post_patch_path }}/{{ ansible_nodename }}-managements.tar"
+    flat: yes
+
+- name: Unarchive the compressed csv files
+  unarchive:
+    src: "{{ data_output_post_patch_path }}/{{ ansible_nodename }}-managements.tar"
+    dest: "{{ data_output_post_patch_path }}"
+    remote_src: yes
+  delegate_to: localhost
+
+- name: Delete temp zip files
+  file:
+    path: "{{ data_output_post_patch_path }}/{{ ansible_nodename }}-managements.tar"
+    state: absent
+  delegate_to: localhost

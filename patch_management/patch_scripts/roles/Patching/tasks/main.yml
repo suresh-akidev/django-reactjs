@@ -1,0 +1,18 @@
+- name: Include config vars to patchconfig
+  include_vars:
+    file: "{{ configfilepath }}"
+    name: patchconfig
+
+- name: upgrade kernel packages on the server
+  yum:
+    name: '*'
+    state: latest
+    exclude: "{{ patchconfig.Ignore_Packages }}"
+    skip_broken: yes
+  register: yum_update
+  ignore_errors: true
+
+- name: Update master execution summary with status
+  shell: echo "{{ ansible_nodename | quote }},{{ role_name | quote }} role,Failed" >> {{ data_output_path }}/Master-Execution-Summary.csv
+  when: yum_update.failed is defined and yum_update.failed == True
+  delegate_to: localhost

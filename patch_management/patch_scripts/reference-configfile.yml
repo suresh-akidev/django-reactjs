@@ -1,0 +1,203 @@
+---
+##########################################################################################
+# Version no of the config file. This is to track newer versions of this file.
+# Example
+# Version: 1.0
+##########################################################################################
+ Version: 1.0
+
+##########################################################################################
+# Account Name - This captures the account name where this tool is deployed. 
+# Used for reporting purposes
+# Example
+# Account_Name: SBIC
+##########################################################################################
+ Account_Name: 
+
+##########################################################################################
+# Technology - Provide the technology name for which the patching is done.
+# Example
+# Technology: redhat-linux
+##########################################################################################
+ Technology: 
+
+##########################################################################################
+# Patchoutput, PrePatchOutput, PostPatchOutput, ValidationOutput - This is to provide the output folders where the output files are saved. 
+# It is not required to change the values
+# Example
+# Patchoutput: patchoutput
+# PrePatchOutput: PrePatch
+# PostPatchOutput: PostPatch
+# ValidationOutput: PatchValidation
+##########################################################################################
+ Patchoutput: patchoutput
+ PrePatchOutput: PrePatch
+ PostPatchOutput: PostPatch
+ ValidationOutput: PatchValidation
+
+##########################################################################################
+# Ignore_Packages - Provide the packages that you don't want to install during packages 
+# Example
+# Ignore_Packages: java*
+# 
+##########################################################################################
+ Ignore_Packages: 
+
+##########################################################################################
+# Inventory - Inventory and server connectivity method are provided here. 
+# Example
+# Inventory_List: /tmp/Inventory_file/PATCH_Management_RHEL_Inventory.csv
+# Provide the list of servers in csv format as shown below
+#     servername,username,password
+# 
+# username and password can be plain text format.
+# username and password also accepts Hashicorp vault path when incorporated with OpsMate.
+# Example
+#      servername,username,password
+#      server1,$HVAC:opsmate/data/rhel/username,$HVAC:opsmate/data/rhel/password
+# $HVAC is a special flag to identify that the credentials are stored in Hashicorp vault instance
+#
+# Connectivity_Method is the variable that tells the connection method from master server to targets.
+# Here we use ansible-ssh. You are not required to change this.  
+##########################################################################################
+ Inventory:
+   Inventory_List: 
+   Connectivity_Method: ansible-ssh
+
+##########################################################################################
+# Patch_Checks - List of all patch checks. 
+# Check_Name - Patch (Constant - Do not change)
+# Check_Id: Not significant. Reserved for future use.
+# Sub_Checks: This is the list of pre/post validation scripts executed on targets.
+#   Name: Name of the check that is done. This typically identify the script output file.
+#   Column_Name: If the output of scripts is a csv file, Column name will be the respective column in 
+#   output file where we need to do matching.
+#                Column_Name is kept empty if the output file cannot be converted to csv file. 
+#   Condition: Based on the column value, what condition to compare with pre and post patch output.
+#              Condition can be ge, le, lt, gt, eq, match, notmatch, info
+#              info - This condition is for information only. No actual validation is done. 
+# 
+##########################################################################################
+ Patch_Checks:
+   - Check_Name: Patch
+     Check_Id: 00A
+     Sub_Checks:
+       - Name: Updated_Packages
+         Column_Name: Updated_Packages
+         Condition: info
+       - Name: FStab
+         Column_Name:
+         Condition:
+       - Name: GroupFile
+         Column_Name:
+         Condition:
+       - Name: JavaPackage
+         Column_Name: RPM Java Package Details
+         Condition: match
+       - Name: LVS
+         Column_Name: LV
+         Condition: match
+       - Name: nproc_details
+         Column_Name: Patchnproc Details
+         Condition: match
+       - Name: ntpd
+         Column_Name: refid
+         Condition: match
+       - Name: PasswordFile
+         Column_Name:
+         Condition:
+       - Name: PhysicalVolume
+         Column_Name: PV
+         Condition: match
+       - Name: ReleaseFile
+         Column_Name: OS-Release-Entry
+         Condition: match
+       - Name: RouteTable
+         Column_Name: Destination
+         Condition: match
+       - Name: RPMPackage
+         Column_Name: RPM Package Details
+         Condition: notmatch
+       - Name: SELinux
+         Column_Name: SELinux status
+         Condition: match
+       - Name: uptime
+         Column_Name: Uptime Days
+         Condition: le
+       - Name: dmicode
+         Column_Name:
+         Condition:
+       - Name: etcexport
+         Column_Name:
+         Condition:
+       - Name: grub
+         Column_Name:
+         Condition:
+       - Name: hosts
+         Column_Name:
+         Condition:
+       - Name: multipath
+         Column_Name:
+         Condition:
+       - Name: ntp
+         Column_Name:
+         Condition:
+       - Name: date_and_clock
+         Column_Name: Date
+         Condition: info
+       - Name: Firewall
+         Column_Name: Loaded
+         Condition: info
+       - Name: ifconfig
+         Column_Name:
+         Condition: info
+       - Name: KernelParameter
+         Column_Name: Kernel Parameter attribute
+         Condition: info
+       - Name: Memory
+         Column_Name: Mem-Total
+         Condition: info
+       - Name: mountpoint
+         Column_Name: Filesystem
+         Condition: match
+       - Name: Networks
+         Column_Name: NAME
+         Condition: match
+       - Name: VGS
+         Column_Name: VG
+         Condition: match
+       - Name: VMTools
+         Column_Name: CMD
+         Condition: match
+       - Name: filesystem
+         Column_Name: filesystem
+         Condition: match
+
+##########################################################################################
+# Output - 
+# Remote_Server_output_path: Place where the scripts will be copied to targets before getting executed
+# Master_Server_Output_path: Place on the master server where the output and temporary files are kept.
+##########################################################################################
+
+ Output:
+   Path:
+     Remote_Server_output_path: 
+     Master_Server_Output_path: 
+
+##########################################################################################
+# Mail - 
+# SMTP_Mail_Server: SMTP server
+# From_Address: From address which the email is being sent.
+# Patch_Management_Result_Recipients: List of email address to be provided below.
+#    - abc@dxc.com
+#    - xyz@dxc.com
+##########################################################################################
+
+ Mail:
+   SMTP_Mail_Server: 
+   From_Address: 
+   Recipients:
+     Patch_Management_Result_Recipients:
+       - 
+
+

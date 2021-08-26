@@ -1,0 +1,18 @@
+---
+- name: Include vars from config yaml file
+  include_vars:
+    file: "{{ configfilepath }}"
+    name: patchconfig
+
+- name: Reboot immediately
+  reboot:
+    reboot_timeout: 3600
+  ignore_errors: yes
+  register: reboot_result
+
+- name: update Reboot Server Status
+  shell: echo "{{ ansible_nodename | quote }}, {{ role_name | quote }} role,Failed " >> {{ data_output_path }}/Master-Execution-Summary.csv
+  when: reboot_result.rebooted is defined and reboot_result.rebooted == False
+  delegate_to: localhost
+
+

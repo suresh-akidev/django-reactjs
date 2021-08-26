@@ -1,0 +1,61 @@
+---
+- name: Return all secrets from a netbackup path to get username and password
+  when: backup_enabled != '0'
+  set_fact:
+    netbackup_user: "{{ lookup('hashi_vault', 'secret=opstool/data/netbackup/'+backup_server).username }}"
+    netbackup_password: "{{ lookup('hashi_vault', 'secret=opstool/data/netbackup/'+backup_server).password }}"
+  ignore_errors: true
+
+- name: request json from j2 for login
+  when: backup_enabled != '0'
+  template:
+    src: "login.j2"
+    dest: "{{ data_output_path }}/netbackup_login.json"
+  ignore_errors: true
+  delegate_to: localhost
+
+- name: Netbackup API login
+  when: backup_enabled != '0'
+  uri:
+    url: "https://{{backup_server}}:1556/netbackup/login"
+    method: POST
+    force_basic_auth: yes
+    validate_certs: false
+    return_content: yes
+    status_code: 201
+    body_format: json
+    body: "{{ lookup('file', data_output_path+'/netbackup_login.json') }}"
+  ignore_errors: true
+  register: netbackup_auth
+  delegate_to: localhost
+
+- name: Converting to epoch to check the backup time
+  set_fact:
+    _time_twodaysold_epoch: "{{ actual_startdate.strftime('%s')|int - (86400 * 2) }}"
+
+- name: Converting to datetime
+  set_fact:
+    time_twodaysold_datetime: "{{ '%Y-%m-%dT%H:%M:%SZ'|strftime(_time_twodaysold_epoch) }}"
+
+- name: checking the job status to check the backup time
+  when: backup_enabled != '0'
+  uri:
+    url: "https://{{backup_server}}:1556/netbackup/admin/jobs?filter=contains(clientName,'{{ ansible_nodename }}')+and+state+eq+'DONE'+and+startTime+ge+{{ time_twodaysold_datetime }}"
+    method: GET
+    validate_certs: false
+    headers:
+      Authorization: "{{ netbackup_auth.json.token }}"
+  ignore_errors: true
+  register: netbackup_status_response
+  delegate_to: localhost 
+
+- name: Update master execution summary with status
+  shell: echo "{{ ansible_nodename | quote }},{{ role_name | quote }} role,Failed" >> {{ data_output_path }}/Master-Execution-Summary.csv
+  when: (netbackup_status_response.failed is defined and netbackup_status_response.failed == True) or (netbackup_status_response.json[0].meta.count is defined and netbackup_status_response.json[0].meta.count == 0)
+  delegate_to: localhost
+
+ # if netbackup_status_response.json[0].meta.count is 0 then fail the host
+- name: checkin backup status
+  fail:
+    msg: The system may not be proceed for patching since the backup for the machine {{ansible_nodename}} is not taken.
+  when: netbackup_status_response.json[0].meta.count is defined and netbackup_status_response.json[0].meta.count == '0' 

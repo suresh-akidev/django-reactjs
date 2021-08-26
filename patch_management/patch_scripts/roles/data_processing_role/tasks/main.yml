@@ -1,0 +1,35 @@
+---
+
+- name: Include config vars to patchconfig
+  include_vars:
+    file: "{{ configfilepath }}"
+    name: patchconfig
+
+- name: remove directory
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+  - "{{ patchconfig.Output.Path.Master_Server_Output_path}}/{{patchconfig.Patchoutput}}/{{ patchconfig.Technology }}/{{ patchconfig.ValidationOutput }}/"
+  delegate_to: localhost
+
+- name: Copy Master-Execution-Summary to target folder
+  copy:
+    src: "{{ data_output_path }}/Master-Execution-Summary.csv"
+    dest: "{{ patchconfig.Output.Path.Master_Server_Output_path }}/{{patchconfig.Patchoutput}}/{{ patchconfig.Technology }}/"
+  delegate_to: localhost
+
+- name: run Dataprocess.py
+  command: python Dataprocess.py -config {{configfilepath}}
+  args:
+    chdir: "{{ role_path }}/files"
+  run_once: true
+  delegate_to: localhost
+  ignore_errors: true
+  register: dataprocessing_status
+
+- name: update dataprocessing status
+  shell: echo "{{ ansible_nodename | quote }}, {{ role_name | quote }} role,Failed " >> {{ data_output_path }}/Master-Execution-Summary.csv
+  when: dataprocessing_status.rc is defined and dataprocessing_status.rc != 0
+  delegate_to: localhost
+

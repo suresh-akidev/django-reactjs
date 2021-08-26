@@ -1,0 +1,101 @@
+---
+- name: Return all secrets from a solarwinds path to get username and password
+  when: monitor_enabled != '0'
+  set_fact:
+    solarwinds_user: "{{ lookup('hashi_vault', 'secret=opstool/data/solarwinds/'+monitor_server).username }}"
+    solarwinds_password: "{{ lookup('hashi_vault', 'secret=opstool/data/solarwinds/'+monitor_server).password }}"
+  ignore_errors: true
+
+- name: getting the node_id of the solarwinds server
+  when: monitor_enabled != '0'
+  uri:
+    url: "https://{{monitor_server}}:17778/SolarWinds/InformationService/v3/Json/Query?query=SELECT+NodeID+FROM+Orion.Nodes+WHERE+SysName='{{ansible_nodename}}'"
+    method: GET
+    user: "{{ solarwinds_user }}"
+    password: "{{ solarwinds_password }}"
+    force_basic_auth: yes
+    validate_certs: false
+  ignore_errors: true
+  register: get_node
+  delegate_to: localhost
+
+- name: request json from j2 for suppress_state
+  when: monitor_enabled != '0'
+  template:
+    src: "suppress_state.j2"
+    dest: "{{ data_output_path }}/suppress_state.json"
+  ignore_errors: true
+  delegate_to: localhost
+
+- name: Get the alert suppression state
+  when: monitor_enabled != '0'
+  uri:
+    url: https://{{monitor_server}}:17778/SolarWinds/InformationService/v3/Json/Invoke/Orion.AlertSuppression/GetAlertSuppressionState
+    method: POST
+    user: "{{ solarwinds_user }}"
+    password: "{{ solarwinds_password }}"
+    force_basic_auth: yes
+    validate_certs: false
+    return_content: yes
+    body_format: json
+    body: "{{ lookup('file', data_output_path+'/suppress_state.json') }}"
+  ignore_errors: true
+  register: get_suppression_state
+  delegate_to: localhost
+
+#- debug: var=get_suppression_state.json[0].SuppressionMode
+
+- name: request json from j2 for suppress_alerts
+  when: monitor_enabled != '0'
+  template:
+    src: "suppress_alerts.j2"
+    dest: "{{ data_output_path }}/suppress_alerts.json"
+  ignore_errors: true
+  delegate_to: localhost
+
+#- debug: msg="patch_flag={{ patch_flag }}, monitor_enabled= {{ monitor_enabled }}"
+- name: suppressing alerts
+  when: monitor_enabled != '0' and get_suppression_state.json[0].SuppressionMode == 0 and patch_flag == "pre"
+  uri:
+    url: https://{{monitor_server}}:17778/SolarWinds/InformationService/v3/Json/Invoke/Orion.AlertSuppression/SuppressAlerts
+    method: POST
+    user: "{{ solarwinds_user }}"
+    password: "{{ solarwinds_password }}"
+    force_basic_auth: yes
+    validate_certs: false
+    return_content: yes
+    body: "{{ lookup('file', data_output_path+'/suppress_alerts.json') }}"
+    body_format: json
+  ignore_errors: true
+  register: suppress_alerts
+  delegate_to: localhost
+
+
+- name: request json from j2 for resume_alerts
+  when: monitor_enabled != '0'
+  template:
+    src: "resume_alerts.j2"
+    dest: "{{ data_output_path }}/resume_alerts.json"
+  ignore_errors: true
+  delegate_to: localhost
+
+- name: resuming alerts
+  when: monitor_enabled != '0' and patch_flag == "post"
+  uri:
+    url: https://{{monitor_server}}:17778/SolarWinds/InformationService/v3/Json/Invoke/Orion.AlertSuppression/ResumeAlerts
+    method: POST
+    user: "{{ solarwinds_user }}"
+    password: "{{ solarwinds_password }}"
+    force_basic_auth: yes
+    validate_certs: false
+    return_content: yes
+    body: "{{ lookup('file', data_output_path+'/resume_alerts.json') }}"
+    body_format: json
+  ignore_errors: true
+  register: resume_alerts
+  delegate_to: localhost
+
+- name: Update master execution summary with status
+  shell: echo "{{ ansible_nodename | quote }},{{ role_name | quote }} role,Failed" >> {{ data_output_path }}/Master-Execution-Summary.csv
+  when: (get_node.failed is defined and get_node.failed == True) or (get_suppression_state.failed is defined and get_suppression_state.failed == True) or (suppress_alerts.failed is defined and suppress_alerts.failed == True) or (resume_alerts.failed is defined and resume_alerts.failed == True)
+  delegate_to: localhost

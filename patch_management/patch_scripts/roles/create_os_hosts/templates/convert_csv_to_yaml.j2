@@ -1,0 +1,10 @@
+---
+serverdetails:
+{% for item in csvfile.split("\n") %}
+{%   if loop.index != 1 %}
+{%     set list = item.split(",") %}
+    - servername: '{{ list[0]|trim() }}'
+      username: '{{ list[1]|trim() }}'
+      password: '{{ list[2]|trim() }}'
+{%   endif %}
+{% endfor %}

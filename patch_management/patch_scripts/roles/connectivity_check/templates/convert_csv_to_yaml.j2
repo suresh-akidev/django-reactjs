@@ -1,0 +1,16 @@
+---
+serverdetails:
+{% for item in csvfile.split("\n") %}
+{%   if loop.index != 1 %}
+{%     set list = item.split(",") %}
+    - servername: '{{ list[0]|trim() }}'
+      username: '{{ list[1]|trim() }}'
+      password: '{{ list[2]|trim() }}'
+      monitor_enabled: '{{ list[3]|trim() }}'
+      monitor_server: '{{ list[4]|trim() }}'
+      backup_enabled: '{{ list[5]|trim() }}'
+      backup_server: '{{ list[6]|trim() }}'
+      actual_startdate: '{{ list[7]|trim() }}'
+      actual_enddate: '{{ list[8]|trim() }}'
+{%   endif %}
+{% endfor %}

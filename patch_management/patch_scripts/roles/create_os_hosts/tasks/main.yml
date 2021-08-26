@@ -1,0 +1,108 @@
+---
+- name: Read input csv file
+  set_fact: 
+    csvfile: "{{ lookup('file', csvfilepath) }}"
+  run_once: true  
+  delegate_to: localhost
+
+- name: Include config vars to patchconfig
+  include_vars:
+    file: "{{ configfilepath }}"
+    name: patchconfig
+
+- name: Checking usable python is installed
+  block:
+    - raw: ls /usr/bin/python*
+      register: usable_python_check
+  rescue:
+    - name: Updating Master-Execution-Summary with usable python check
+      raw: echo "{{ ansible_nodename }},Python check,Unreachable" >> {{ data_output_path }}/Master-Execution-Summary.csv
+      when: usable_python_check.msg is defined and usable_python_check.msg == "non-zero return code"
+      delegate_to: localhost
+
+- name: Ansible ping test on ssh hosts
+  ping:
+  register: ansible_ping_results
+  ignore_errors: true
+
+- name: Clearing hosts errors
+  meta: clear_host_errors
+
+- name: Adding ssh ping results
+  shell: echo "{{ ansible_nodename | quote }},Authentication issue in role {{ role_name | quote }},Unreachable" >> {{ data_output_path }}/Master-Execution-Summary.csv
+  when: ansible_ping_results.unreachable is defined and ansible_ping_results.unreachable == True
+  delegate_to: localhost
+
+- name: Parse server details to yaml
+  template: 
+    src: "convert_csv_to_yaml.j2"
+    dest: "{{ data_output_path }}/converted_inventory_file.yml"
+  run_once: true
+  delegate_to: localhost
+
+- name: Loop through serverlist and add to variables
+  include_vars:   
+    file: "{{ data_output_path }}/converted_inventory_file.yml"
+    name: serverdetailsvars
+  run_once: true
+  delegate_to: localhost
+  
+- name: Run ansible setup to gather facts
+  setup:
+  ignore_errors: true
+  
+- name: Ansible /tmp stat check
+  stat: 
+    path: /tmp
+  ignore_errors: true
+  register: stat_check
+
+- name: Add rhel hosts dynamically
+  add_host:
+    name: "{{ item }}"
+    groups: rhelhosts
+    ansible_user: "{{ hostvars[item]['ansible_user'] }}"
+  when: hostvars[item]['ansible_distribution'] is defined and hostvars[item]['ansible_distribution'] == "RedHat"
+  with_items: 
+    - "{{ groups['sshhosts'] }}"
+  ignore_errors: true
+  register: rhelhostsstatus
+
+- name: Add Oracle Linux hosts dynamically
+  add_host:
+    name: "{{ item }}"
+    groups: oraclelinuxhosts
+    ansible_user: "{{ hostvars[item]['ansible_user'] }}"
+  when: hostvars[item]['ansible_distribution'] is defined and hostvars[item]['ansible_distribution'] == "OracleLinux"
+  with_items: 
+    - "{{ groups['sshhosts'] }}"
+  ignore_errors: true
+  register: oraclehostsstatus
+
+- name: Update Master-Execution-Summary with rhelhostsstatus
+  shell: echo "{{ ansible_nodename }},Ansible tasks execution,Failed" >> {{ data_output_path }}/Master-Execution-Summary.csv
+  with_items: "{{ rhelhostsstatus.results }}"
+  when: item.failed is defined and item.failed == True
+  run_once: true
+  delegate_to: localhost
+
+- name: Update Master-Execution-Summary with oraclehostsstatus
+  shell: echo "{{ ansible_nodename }},Ansible tasks execution,Failed" >> {{ data_output_path }}/Master-Execution-Summary.csv
+  with_items: "{{ oraclehostsstatus.results }}"
+  when: item.failed is defined and item.failed == True
+  run_once: true
+  delegate_to: localhost
+
+- name: Update Master-Execution-Summary with stat_check results
+  shell: echo "{{ ansible_nodename }},Stat check of /tmp,Failed" >> {{ data_output_path }}/Master-Execution-Summary.csv
+  with_items: "{{ stat_check.stat.isdir }}"
+  when: stat_check.stat is defined and item is not defined and item != True
+  run_once: true
+  delegate_to: localhost
+
+- name: Cleanup temporary inventory file
+  file: 
+    path: "{{ data_output_path }}/converted_inventory_file.yml"
+    state: absent
+  run_once: true
+  delegate_to: localhost

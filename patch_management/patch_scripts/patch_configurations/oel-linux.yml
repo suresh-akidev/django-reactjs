@@ -1,0 +1,125 @@
+---
+ Version: 1.0
+
+ Account_Name: 
+
+ Technology: oel-linux
+ Patchoutput: patchoutput
+ PrePatchOutput: PrePatch
+ PostPatchOutput: PostPatch
+ ValidationOutput: PatchValidation
+
+ Ignore_Packages: "*java*"
+
+ Inventory:
+   Inventory_List: /opt/app/working/{{ job_id }}/patchinput/inventory/inventory.csv
+   Connectivity_Method: ansible-ssh
+
+ Patch_Checks:
+   - Check_Name: Patch
+     Check_Id: 00A
+     Sub_Checks:
+       - Name: Updated_Packages
+         Column_Name: Updated_Packages
+         Condition: info
+       - Name: FStab
+         Column_Name:
+         Condition:
+       - Name: GroupFile
+         Column_Name:
+         Condition:
+       - Name: JavaPackage
+         Column_Name: RPM Java Package Details
+         Condition: match
+       - Name: LVS
+         Column_Name: LV
+         Condition: match
+       - Name: nproc_details
+         Column_Name: Patchnproc Details
+         Condition: match
+       - Name: ntpd
+         Column_Name: refid
+         Condition: match
+       - Name: PasswordFile
+         Column_Name:
+         Condition:
+       - Name: PhysicalVolume
+         Column_Name: PV
+         Condition: match
+       - Name: ReleaseFile
+         Column_Name: OS-Release-Entry
+         Condition: match
+       - Name: RouteTable
+         Column_Name: Destination
+         Condition: match
+       - Name: RPMPackage
+         Column_Name: RPM Package Details
+         Condition: notmatch
+       - Name: SELinux
+         Column_Name: SELinux status
+         Condition: match
+       - Name: uptime
+         Column_Name: Uptime Days
+         Condition: le
+       - Name: dmicode
+         Column_Name:
+         Condition:
+       - Name: etcexport
+         Column_Name:
+         Condition:
+       - Name: grub
+         Column_Name:
+         Condition:
+       - Name: hosts
+         Column_Name:
+         Condition:
+       - Name: multipath
+         Column_Name:
+         Condition:
+       - Name: ntp
+         Column_Name:
+         Condition:
+       - Name: date_and_clock
+         Column_Name: Date
+         Condition: info
+       - Name: Firewall
+         Column_Name: Loaded
+         Condition: info
+       - Name: ifconfig
+         Column_Name:
+         Condition: info
+       - Name: KernelParameter
+         Column_Name: Kernel Parameter attribute
+         Condition: info
+       - Name: Memory
+         Column_Name: Mem-Total
+         Condition: info
+       - Name: mountpoint
+         Column_Name: Filesystem
+         Condition: match
+       - Name: Networks
+         Column_Name: NAME
+         Condition: match
+       - Name: VGS
+         Column_Name: VG
+         Condition: match
+       - Name: VMTools
+         Column_Name: CMD
+         Condition: match
+       - Name: filesystem
+         Column_Name: filesystem
+         Condition: match
+
+ Output:
+   Path:
+     Remote_Server_output_path: /tmp
+     Master_Server_Output_path: /opt/app/working/{{ jobid }}
+
+ Mail:
+   SMTP_Mail_Server: 
+   From_Address:
+   Recipients:
+     Patch_Management_Result_Recipients:
+       - 
+
+

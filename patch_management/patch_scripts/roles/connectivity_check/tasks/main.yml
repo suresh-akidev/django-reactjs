@@ -1,0 +1,116 @@
+---
+- name: Include vars from config yaml file
+  include_vars:
+    file: "{{ configfilepath }}"
+    name: patchconfig
+
+- name: Cleanup local temp
+  file:
+    path: "{{ item }}"
+    state: absent
+  with_items:
+    - "{{ data_output_path }}/Master-Execution-Summary.csv"
+    - "{{ data_output_path }}/converted_inventory_file.yml"
+    - "{{ patchconfig.Output.Path.Master_Server_Output_path}}/{{ patchconfig.Technology }}/"
+    - "{{ patchconfig.Output.Path.Master_Server_Output_path}}/{{ patchconfig.Patchoutput }}/{{ patchconfig.Technology }}/"
+  delegate_to: localhost
+
+- name: Read input csv file
+  set_fact:
+    csvfile: "{{ lookup('file', patchconfig.Inventory.Inventory_List) }}"
+  delegate_to: localhost
+  no_log: true
+
+- name: Create working directory on ansible server
+  file:
+    path: "{{ data_output_path }}"
+    state: directory
+  delegate_to: localhost
+
+- name: Parse server details to yaml
+  template:
+    src: "convert_csv_to_yaml.j2"
+    dest: "{{ data_output_path }}/converted_inventory_file.yml"
+  run_once: true
+  delegate_to: localhost
+  no_log: true
+
+- name: Loop through serverlist and add to variables
+  include_vars:
+    file: "{{ data_output_path }}/converted_inventory_file.yml"
+    name: serverdetailsvars
+  run_once: true
+  delegate_to: localhost
+  no_log: true
+  register: master
+
+- name: Create headers for Master-Execution-Summary.csv
+  shell: echo "HostName,TaskName,Result" > {{ data_output_path }}/Master-Execution-Summary.csv
+  delegate_to: localhost
+
+- name: Skip checks for commented servers
+  shell: echo "{{ item['servername'] }},{{role_name}},Excluded" >> {{ data_output_path }}/Master-Execution-Summary.csv
+  with_items:
+    - "{{ serverdetailsvars.serverdetails }}"
+  when: item['servername'] is match("#.*")
+  delegate_to: localhost
+  no_log: true
+
+- name: Connectivity check on ssh port
+  wait_for:
+    timeout: 30
+    port: 22
+    host: "{{ item['servername'] }}"
+  with_items:
+    - "{{ serverdetailsvars.serverdetails }}"
+  when: item['servername'] is not match("#.*") and patchconfig.Inventory.Connectivity_Method  == "ansible-ssh"
+  ignore_errors: true
+  register: "connectivity_22_status"
+  no_log: true
+
+- name: Update ssh port check results
+  shell: echo "{{ item.item['servername'] }},Port 22 check of role {{ role_name }},Unreachable" >> {{ data_output_path }}/Master-Execution-Summary.csv
+  with_items: "{{ connectivity_22_status.results }}"
+  when: item.failed is defined and item.failed == True
+  run_once: true
+  delegate_to: localhost
+  no_log: true
+
+- name: Task to fetch HVAC credentials
+  include_tasks: vault-cred.yml
+
+- name: Checking usable python is installed
+  block:
+    - raw: ls /usr/bin/python*
+      register: usable_python_check
+  rescue:
+    - name: Updating Master-Execution-Summary with usable python check
+      raw: echo "{{ ansible_nodename }},Python check,Unreachable" >> {{ data_output_path }}/Master-Execution-Summary.csv
+      when: usable_python_check.msg is defined and usable_python_check.msg == "non-zero return code"
+      delegate_to: localhost
+
+- name: Ansible ping test on ssh hosts
+  ping:
+  register: ansible_ping_results
+  ignore_errors: true
+
+- name: Add ssh hosts dynamically
+  add_host:
+    name: "{{ item['servername'] }}"
+    groups: sshhosts
+    ansible_user: "{{ item['username'] }}"
+    ansible_password: "{{ item['password'] }}"
+    monitor_enabled: "{{ item['monitor_enabled'] }}"
+    monitor_server: "{{ item['monitor_server'] }}"
+    backup_enabled: "{{ item['backup_enabled'] }}"
+    backup_server: "{{ item['backup_server'] }}"
+    actual_startdate: "{{ item['actual_startdate'] }}"
+    actual_enddate: "{{ item['actual_enddate'] }}"
+    ansible_connection: ssh
+  with_items:
+    - "{{ serverdetailsvars.serverdetails }}"
+  when: item['servername'] is not match("#.*") and patchconfig.Inventory.Connectivity_Method  == "ansible-ssh" and ("$HVAC:" not in item['username'] and "$HVAC:" not in item['password'])
+  ignore_errors: true
+  delegate_to: localhost
+  no_log: true
+

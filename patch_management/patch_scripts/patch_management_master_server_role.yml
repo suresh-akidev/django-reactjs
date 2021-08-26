@@ -1,0 +1,184 @@
+---
+- hosts: localhost
+  gather_facts: true
+  vars:
+    configfilepath: "{{ hostvars[groups[NODE][0]]['fact_configfilepath'] }}"
+
+  tasks:
+    - name: Include vars from config yaml file
+      include_vars:
+        file: "{{ configfilepath }}"
+        name: patchconfig
+
+    - name: Set inventory file path as a fact for all roles to use
+      set_fact:
+        fact_csvfilepath: "{{ patchconfig.Inventory.Inventory_List }}"
+        csvfilepath: "{{ patchconfig.Inventory.Inventory_List }}"
+        data_output_path: "{{ patchconfig.Output.Path.Master_Server_Output_path}}/{{ patchconfig.Technology }}/"
+        data_output_pre_patch_path: "{{ patchconfig.Output.Path.Master_Server_Output_path}}/{{patchconfig.Patchoutput}}/{{ patchconfig.Technology }}/{{ patchconfig.PrePatchOutput }}/"
+        data_output_post_patch_path: "{{ patchconfig.Output.Path.Master_Server_Output_path}}/{{patchconfig.Patchoutput}}/{{ patchconfig.Technology }}/{{ patchconfig.PostPatchOutput }}/"
+        data_output_validation_patch_path: "{{ patchconfig.Output.Path.Master_Server_Output_path}}/{{patchconfig.Patchoutput}}/{{ patchconfig.Technology }}/{{ patchconfig.ValidationOutput }}/"
+        fact_configfilepath: "{{ configfilepath }}"
+        connectivity_method: "{{ patchconfig.Inventory.Connectivity_Method }}"
+        technology: "{{ patchconfig.Technology }}"
+
+- hosts: localhost
+  name: Connectivity check role execution
+  vars:
+    configfilepath: "{{ hostvars['localhost']['fact_configfilepath'] }}"
+    csvfilepath: "{{ hostvars['localhost']['fact_csvfilepath'] }}"
+    data_output_path: "{{ hostvars['localhost']['data_output_path'] }}"
+    connectivity_method: "{{ hostvars['localhost']['connectivity_method'] }}"
+  roles:
+    - connectivity_check
+
+- hosts: sshhosts
+  name: SSH hosts preparation
+  gather_facts: true
+  vars:
+    configfilepath: "{{ hostvars['localhost']['fact_configfilepath'] }}"
+    csvfilepath: "{{ hostvars['localhost']['fact_csvfilepath'] }}"
+    data_output_path: "{{ hostvars['localhost']['data_output_path'] }}"
+  roles:
+    - create_os_hosts
+
+- hosts: sshhosts
+  name: disable solarwinds monitoring
+  gather_facts: true
+  vars:
+    configfilepath: "{{ hostvars['localhost']['fact_configfilepath'] }}"
+    csvfilepath: "{{ hostvars['localhost']['fact_csvfilepath'] }}"
+    data_output_path: "{{ hostvars['localhost']['data_output_path'] }}"
+    patch_flag: "pre"
+  roles:
+    - solarwinds_check
+
+- hosts: rhelhosts
+  name: Pre Sanity Script Execution
+  gather_facts: true
+  vars:
+    configfilepath: "{{ hostvars['localhost']['fact_configfilepath'] }}"
+    csvfilepath: "{{ hostvars['localhost']['fact_csvfilepath'] }}"
+    data_output_pre_patch_path: "{{ hostvars['localhost']['data_output_pre_patch_path'] }}"
+    technology: "{{ hostvars['localhost']['technology'] }}"
+  roles:
+    - role: Pre_sanity_script_Execution
+      when: technology == 'redhat-linux'
+
+- hosts: oraclelinuxhosts
+  name: Pre Sanity Script Execution
+  gather_facts: true
+  vars:
+    configfilepath: "{{ hostvars['localhost']['fact_configfilepath'] }}"
+    csvfilepath: "{{ hostvars['localhost']['fact_csvfilepath'] }}"
+    data_output_pre_patch_path: "{{ hostvars['localhost']['data_output_pre_patch_path'] }}"
+    technology: "{{ hostvars['localhost']['technology'] }}"
+  roles:
+    - role: Pre_sanity_script_Execution
+      when: technology == 'oel-linux'
+
+- hosts: rhelhosts
+  name: Reboot Red-Hat Server
+  gather_facts: true
+  vars:
+    configfilepath: "{{ hostvars['localhost']['fact_configfilepath'] }}"
+    csvfilepath: "{{ hostvars['localhost']['fact_csvfilepath'] }}"
+    data_output_path: "{{ hostvars['localhost']['data_output_path'] }}"
+    technology: "{{ hostvars['localhost']['technology'] }}"
+  roles:
+    - role: Reboot_Server
+      when: technology == 'redhat-linux'
+  become: true
+  become_user: root
+
+
+- hosts: oraclelinuxhosts
+  name: Reboot Oracle Server
+  gather_facts: true
+  vars:
+    configfilepath: "{{ hostvars['localhost']['fact_configfilepath'] }}"
+    csvfilepath: "{{ hostvars['localhost']['fact_csvfilepath'] }}"
+    data_output_path: "{{ hostvars['localhost']['data_output_path'] }}"
+    technology: "{{ hostvars['localhost']['technology'] }}"
+  roles:
+    - role: Reboot_Server
+      when: technology == 'oel-linux'
+  become: true
+  become_user: root
+
+- hosts: rhelhosts
+  name: Patch RHEL Server
+  gather_facts: true
+  vars:
+    configfilepath: "{{ hostvars['localhost']['fact_configfilepath'] }}"
+    csvfilepath: "{{ hostvars['localhost']['fact_csvfilepath'] }}"
+    data_output_path: "{{ hostvars['localhost']['data_output_path'] }}"
+    technology: "{{ hostvars['localhost']['technology'] }}"
+  roles:
+    - role: Patching
+    - role: Reboot_Server
+      when: technology == 'redhat-linux'
+  become: true
+  become_user: root
+
+- hosts: oraclelinuxhosts
+  name: Patch Oracle  Server
+  gather_facts: true
+  vars:
+    configfilepath: "{{ hostvars['localhost']['fact_configfilepath'] }}"
+    csvfilepath: "{{ hostvars['localhost']['fact_csvfilepath'] }}"
+    data_output_path: "{{ hostvars['localhost']['data_output_path'] }}"
+    technology: "{{ hostvars['localhost']['technology'] }}"
+  roles:
+    - role: Patching
+    - role: Reboot_Server
+      when: technology == 'oel-linux'
+  become: true
+  become_user: root
+
+- hosts: rhelhosts
+  name: Post Sanity Script Execution
+  gather_facts: true
+  vars:
+    configfilepath: "{{ hostvars['localhost']['fact_configfilepath'] }}"
+    csvfilepath: "{{ hostvars['localhost']['fact_csvfilepath'] }}"
+    data_output_post_patch_path: "{{ hostvars['localhost']['data_output_post_patch_path'] }}"
+    technology: "{{ hostvars['localhost']['technology'] }}"
+  roles:
+    - role: Post_sanity_script_Execution
+      when: technology == 'redhat-linux'
+
+- hosts: oraclelinuxhosts
+  name: Post Sanity Script Execution
+  gather_facts: true
+  vars:
+    configfilepath: "{{ hostvars['localhost']['fact_configfilepath'] }}"
+    csvfilepath: "{{ hostvars['localhost']['fact_csvfilepath'] }}"
+    data_output_post_patch_path: "{{ hostvars['localhost']['data_output_post_patch_path'] }}"
+    technology: "{{ hostvars['localhost']['technology'] }}"
+  roles:
+    - role: Post_sanity_script_Execution
+      when: technology == 'oel-linux'
+
+- hosts: sshhosts
+  name: disable solarwinds monitoring
+  gather_facts: true
+  vars:
+    configfilepath: "{{ hostvars['localhost']['fact_configfilepath'] }}"
+    csvfilepath: "{{ hostvars['localhost']['fact_csvfilepath'] }}"
+    data_output_path: "{{ hostvars['localhost']['data_output_path'] }}"
+    patch_flag: "post"
+  roles:
+    - solarwinds_check
+
+- hosts: "{{ NODE }}"
+  name: Dataprocessing and reporting scripts execution
+  gather_facts: true
+  vars:
+    configfilepath: "{{ hostvars['localhost']['fact_configfilepath'] }}"
+    csvfilepath: "{{ hostvars['localhost']['fact_csvfilepath'] }}"
+    data_output_path: "{{ hostvars['localhost']['data_output_path'] }}"
+  roles:
+    - data_processing_role
+    - patch_report
+
